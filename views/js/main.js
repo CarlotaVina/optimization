@@ -367,7 +367,7 @@ var pizzaElementGenerator = function(i) {
       pizzaName,                  // the pizza name itself
       ul;                         // the list of ingredients
 
-    
+  
   pizzaContainer  = document.createElement("div");
   pizzaImageContainer = document.createElement("div");
   pizzaImage = document.createElement("img");
@@ -396,13 +396,13 @@ var pizzaElementGenerator = function(i) {
   pizzaDescriptionContainer.appendChild(ul);
   pizzaContainer.appendChild(pizzaDescriptionContainer);
   
-    
-
+  
   return pizzaContainer;
 };
 
 // resizePizzas(size) is called when the slider in the "Our Pizzas" section of the website moves.
-var resizePizzas = function(size) { 
+var resizePizzas = function(size) {	 
+
 
   window.performance.mark("mark_start_resize");   // User Timing API function
 
@@ -457,16 +457,39 @@ var resizePizzas = function(size) {
   }
 
   // Iterates through pizza elements on the page and changes their widths
-  function changePizzaSizes(size) {
-  
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
-    }
+ function changePizzaSizes(size) {
+/* Carlota Vina optimization.- I calculate the newWidth variable in this funcion
+* to avoid useless and repetitives calls.- This calls cause layout forced 
+* synchronous
+*/
+  switch(size) {
+      case "1":
+	      newWidth = 25;
+		  break;
+	 case "2":
+	      newWidth = 33.3;
+		  break;
+	case "3":
+           newWidth = 50;
+		  break;
+	  default :
+	  console.log("bug in sizeSwitcher");
+	  }
+/* Carlota Vina optimization.- I calculate pizzas variable once outside
+* the loop
+*/
+	 
+	 var pizzas = document.getElementsByClassName("randomPizzaContainer");
+   	  
+for (var i = 0; i < pizzas.length; i++) {
+/* Carlota Vina optimization.- I change loop instructions to avoid layout
+* force synchronous
+*/
+     	pizzas[i].style.width =  newWidth + "%";
+	   }
   }
-
-  changePizzaSizes(size);
+  
+   changePizzaSizes(size);
 
   // User Timing API is awesome
   window.performance.mark("mark_end_resize");
@@ -476,10 +499,11 @@ var resizePizzas = function(size) {
 };
 
 window.performance.mark("mark_start_generating"); // collect timing data
- 
+ console.log("antes bucle pizzaElementGenerator  ");
 // This for-loop actually creates and appends all of the pizzas when the page loads
 for (var i = 2; i < 100; i++) {
   var pizzasDiv = document.getElementById("randomPizzas");
+   console.log("llamando a pizzaElementGenerator  ");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
 
@@ -510,30 +534,19 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
-  
-  var cols = 5;
-  var s = 100;
- 
-  for (var i = 0; i < 5; i++) {
-    var elem = document.createElement('img');
-	elem.className = 'mover';
-    elem.src = "images/pizza.png";
-    elem.style.height = "100px";
-    elem.style.width = "73.333px";
-    elem.basicLeft = (i % cols) * s;
-	console.log(" step1 variables  i "+i+" elem.style.top "+ elem.style.top);
-    elem.style.top = (Math.floor(i / cols) * s) + 'px';
-	console.log(" step2 variables i "+i+" elem.style.top "+ elem.style.top);
-    document.querySelector("#movingPizzas1").appendChild(elem);
-	
-	var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-	var elem1 = document.querySelector('.mover');
-    console.log(" step3 variables i "+i+" elem.basicLeft "+ elem.basicLeft);
-	elem1.style.left = elem.basicLeft + 100 * phase + 'px';
-	console.log(" step4 variables i "+i+" item1.style.left "+ elem1.style.left+ " phase "+phase);
-	
-  }
 
+  //var items = document.querySelectorAll('.mover');
+  //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5))
+ /* Carlota Vina optimization. I calculate scrollTop variable outside loop because
+ * doesn't depend of i.
+ */
+  
+  var scrollTop = document.body.scrollTop;
+  
+  for (var i = 0; i < items.length ; i++) {
+      var phase = Math.sin((scrollTop / 1250) + (i % 5));
+    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+  }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
@@ -546,14 +559,30 @@ function updatePositions() {
 }
 
 // runs updatePositions on scroll
-console.log("before  updatePositions");
 window.addEventListener('scroll', updatePositions);
-console.log("after updatePositions");
+
+
 
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
-  
-console.log("before updatePositions load");
-updatePositions();
-console.log("after updatePositions load");
+  var cols = 8;
+  var s = 256;
+  /* Carlota Vina optimization. I change number elements. I only need 35 pizzas
+  */
+  for (var i = 0; i < 35; i++) {
+    var elem = document.createElement('img');
+    elem.className = 'mover';
+    elem.src = "images/pizza.png";
+    elem.style.height = "100px";
+    elem.style.width = "73.333px";
+    elem.basicLeft = (i % cols) * s;
+    elem.style.top = (Math.floor(i / cols) * s) + 'px';
+    document.querySelector("#movingPizzas1").appendChild(elem);
+  }
+  /* Carlota Vina optimization. I calculate items variable on load before updatePositions
+  * I also use getElementsByClassName
+  */
+   items = document.getElementsByClassName('mover');
+     
+  updatePositions();
 });
