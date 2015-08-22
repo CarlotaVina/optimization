@@ -42,5 +42,43 @@ Now, click record button and scroll the page, end recording. Number frames is 60
 Now, you scroll the page until to see a bar below Text Our Pizzas, before the images's pizzas. You click the record button and you move the bar to select the 
 pizzas size. You end the record. You go to console log, there is a message with the resize pizzas time.
 
+#####Part 4: Optimizations  main.js
+
+Main.js's optimizations are :
+
+/* Carlota Vina optimization.- I calculate the newWidth variable in this funcion
+* to avoid useless and repetitives calls.- This calls cause layout forced 
+* synchronous
+*/
+
+changePizzaSizes(size)
+
+I optimize  changePizzaSizes. Original function call in each iteration determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);. 
+It's better to calculate newWidth once before loop. I remove call to determineDx.I also calculated pizzas before the loop. I use getElementsByClassName instead 
+querySelectorAll.
+
+updatePositions
+
+ 
+ My goal was to take out the loop variables what they don't depend of i. This variable is scrollTop.
+ In each page scroll, it executes updatePosition and it's calculated var items = document.querySelectorAll('.mover');
+ 
+ I changed where this variable is calculates. The place is in event load.
+ 
+ document.addEventListener('DOMContentLoaded', function() {
+ 
+ I changed the number pizzas. In load it is only necessary calculate 35
+ 
+ 
+#####Part 4: Optimizations  index.html
+
+To increase speed I create a style what I apply to higher part screen.
+Original screen uses two css. I did some changes. First I only apply print.css if it's printed the screen
+Second css it's loaded when the lower screen is visualized.
+I use sync when js are loaded
+ 
+ 
+
+
 
 
